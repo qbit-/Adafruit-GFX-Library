@@ -1,15 +1,23 @@
 #ifndef _ADAFRUIT_GFX_H
 #define _ADAFRUIT_GFX_H
 
+#ifdef ARDUINO
+#define _STREAMCLASS Print
 #if ARDUINO >= 100
  #include "Arduino.h"
  #include "Print.h"
 #else
  #include "WProgram.h"
 #endif
+#else
+ #define _STREAMCLASS Stream
+ #include "mbed.h"
+ #include "Stream.h"
+#endif
+
 #include "gfxfont.h"
 
-class Adafruit_GFX : public Print {
+class Adafruit_GFX : public _STREAMCLASS {
 
  public:
 
@@ -122,6 +130,10 @@ class Adafruit_GFX : public Print {
   int16_t getCursorY(void) const;
 
  protected:
+  #ifndef ARDUINO 
+  virtual int _putc(int value);
+  virtual int _getc();
+  #endif
   void
     charBounds(char c, int16_t *x, int16_t *y,
       int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
