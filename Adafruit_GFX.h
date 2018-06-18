@@ -106,7 +106,7 @@ class Adafruit_GFX : public Stream {
      *
      * @param c The character to write to the display
      */
-    int write(uint8_t c);
+    void write(uint8_t c);
  
     /** Write a formatted string to the LCD
      *
@@ -125,6 +125,11 @@ class Adafruit_GFX : public Stream {
   int16_t getCursorY(void) const;
 
  protected:
+
+  // Stream implementation functions
+    int _putc(int value);
+    int _getc();
+
   void
     charBounds(char c, int16_t *x, int16_t *y,
       int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
@@ -143,9 +148,6 @@ class Adafruit_GFX : public Stream {
     _cp437; // If set, use correct CP437 charset (default is off)
   GFXfont
     *gfxFont;
-// Stream implementation functions
-    virtual int _putc(int value);
-    virtual int _getc();
 
 };
 

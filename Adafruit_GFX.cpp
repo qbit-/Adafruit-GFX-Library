@@ -845,8 +845,8 @@ void Adafruit_GFX::write(uint8_t c) {
     }
 }
 
-int Adafruit_GFX::_putc(uint8_t c) {
-  write(c);
+int Adafruit_GFX::_putc(int c) {
+  write((uint8_t) c);
   return 1;
 }
 // get a single character (Stream implementation)
@@ -993,7 +993,7 @@ void Adafruit_GFX::charBounds(char c, int16_t *x, int16_t *y,
 }
 
 // Pass string and a cursor position, returns UL corner and W,H.
-void Adafruit_GFX::getTextBounds(char *str, int16_t x, int16_t y,
+void Adafruit_GFX::getTextBounds(const char *str, int16_t x, int16_t y,
         int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h) {
     uint8_t c; // Current character
 
@@ -1017,28 +1017,28 @@ void Adafruit_GFX::getTextBounds(char *str, int16_t x, int16_t y,
 }
 
 // Same as above, but for PROGMEM strings
-void Adafruit_GFX::getTextBounds(const __FlashStringHelper *str,
-        int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h) {
-    uint8_t *s = (uint8_t *)str, c;
+// void Adafruit_GFX::getTextBounds(const __FlashStringHelper *str,
+//         int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h) {
+//     uint8_t *s = (uint8_t *)str, c;
 
-    *x1 = x;
-    *y1 = y;
-    *w  = *h = 0;
+//     *x1 = x;
+//     *y1 = y;
+//     *w  = *h = 0;
 
-    int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
+//     int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
 
-    while((c = pgm_read_byte(s++)))
-        charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
+//     while((c = pgm_read_byte(s++)))
+//         charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
 
-    if(maxx >= minx) {
-        *x1 = minx;
-        *w  = maxx - minx + 1;
-    }
-    if(maxy >= miny) {
-        *y1 = miny;
-        *h  = maxy - miny + 1;
-    }
-}
+//     if(maxx >= minx) {
+//         *x1 = minx;
+//         *w  = maxx - minx + 1;
+//     }
+//     if(maxy >= miny) {
+//         *y1 = miny;
+//         *h  = maxy - miny + 1;
+//     }
+// }
 
 // Return the size of the display (per current rotation)
 int16_t Adafruit_GFX::width(void) const {
