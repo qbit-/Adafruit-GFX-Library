@@ -33,11 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "Adafruit_GFX.h"
 #include "glcdfont.c"
-#ifdef __AVR__
-  #include <avr/pgmspace.h>
-#elif defined(ESP8266) || defined(ESP32)
-  #include <pgmspace.h>
-#endif
 
 // Many (but maybe not all) non-AVR board installs define macros
 // for compatibility with existing PROGMEM-reading AVR code.
@@ -806,11 +801,7 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
     } // End classic vs custom font
 }
 
-#if ARDUINO >= 100
-size_t Adafruit_GFX::write(uint8_t c) {
-#else
 void Adafruit_GFX::write(uint8_t c) {
-#endif
     if(!gfxFont) { // 'Classic' built-in font
 
         if(c == '\n') {                        // Newline?
@@ -852,9 +843,15 @@ void Adafruit_GFX::write(uint8_t c) {
         }
 
     }
-#if ARDUINO >= 100
-    return 1;
-#endif
+}
+
+int Adafruit_GFX::_putc(uint8_t c) {
+  write(c);
+  return 1;
+}
+// get a single character (Stream implementation)
+int Adafruit_GFX::_getc() {
+    return -1;
 }
 
 void Adafruit_GFX::setCursor(int16_t x, int16_t y) {
@@ -885,7 +882,7 @@ void Adafruit_GFX::setTextColor(uint16_t c, uint16_t b) {
     textbgcolor = b;
 }
 
-void Adafruit_GFX::setTextWrap(boolean w) {
+void Adafruit_GFX::setTextWrap(bool w) {
     wrap = w;
 }
 
@@ -916,7 +913,7 @@ void Adafruit_GFX::setRotation(uint8_t x) {
 // with the erroneous character indices.  By default, the library uses the
 // original 'wrong' behavior and old sketches will still work.  Pass 'true'
 // to this function to use correct CP437 character values in your code.
-void Adafruit_GFX::cp437(boolean x) {
+void Adafruit_GFX::cp437(bool x) {
     _cp437 = x;
 }
 
@@ -1052,7 +1049,7 @@ int16_t Adafruit_GFX::height(void) const {
     return _height;
 }
 
-void Adafruit_GFX::invertDisplay(boolean i) {
+void Adafruit_GFX::invertDisplay(bool i) {
     // Do nothing, must be subclassed if supported by hardware
 }
 
@@ -1092,7 +1089,7 @@ void Adafruit_GFX_Button::initButtonUL(
   strncpy(_label, label, 9);
 }
 
-void Adafruit_GFX_Button::drawButton(boolean inverted) {
+void Adafruit_GFX_Button::drawButton(bool inverted) {
   uint16_t fill, outline, text;
 
   if(!inverted) {
@@ -1113,22 +1110,22 @@ void Adafruit_GFX_Button::drawButton(boolean inverted) {
     _y1 + (_h/2) - (4 * _textsize));
   _gfx->setTextColor(text);
   _gfx->setTextSize(_textsize);
-  _gfx->print(_label);
+  _gfx->puts(_label);
 }
 
-boolean Adafruit_GFX_Button::contains(int16_t x, int16_t y) {
+bool Adafruit_GFX_Button::contains(int16_t x, int16_t y) {
   return ((x >= _x1) && (x < (_x1 + _w)) &&
           (y >= _y1) && (y < (_y1 + _h)));
 }
 
-void Adafruit_GFX_Button::press(boolean p) {
+void Adafruit_GFX_Button::press(bool p) {
   laststate = currstate;
   currstate = p;
 }
 
-boolean Adafruit_GFX_Button::isPressed() { return currstate; }
-boolean Adafruit_GFX_Button::justPressed() { return (currstate && !laststate); }
-boolean Adafruit_GFX_Button::justReleased() { return (!currstate && laststate); }
+bool Adafruit_GFX_Button::isPressed() { return currstate; }
+bool Adafruit_GFX_Button::justPressed() { return (currstate && !laststate); }
+bool Adafruit_GFX_Button::justReleased() { return (!currstate && laststate); }
 
 // -------------------------------------------------------------------------
 
@@ -1165,12 +1162,10 @@ uint8_t* GFXcanvas1::getBuffer(void) {
 }
 
 void GFXcanvas1::drawPixel(int16_t x, int16_t y, uint16_t color) {
-#ifdef __AVR__
-    // Bitmask tables of 0x80>>X and ~(0x80>>X), because X>>Y is slow on AVR
-    static const uint8_t PROGMEM
-        GFXsetBit[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 },
-        GFXclrBit[] = { 0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE };
-#endif
+  // Bitmask tables of 0x80>>X and ~(0x80>>X), because X>>Y is slow on AVR
+  static const uint8_t PROGMEM
+    GFXsetBit[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 },
+    GFXclrBit[] = { 0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE };
 
     if(buffer) {
         if((x < 0) || (y < 0) || (x >= _width) || (y >= _height)) return;
