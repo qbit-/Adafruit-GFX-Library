@@ -113,7 +113,7 @@ class Adafruit_GFX : public Stream {
      * @param format A printf-style format string, followed by the
      *               variables to use in formatting the string.
      */
-    int printf(const char* format, ...);
+    // int printf(const char* format, ...);
 
   int16_t height(void) const;
   int16_t width(void) const;
